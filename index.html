@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Do you love me?</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #scene {
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 3rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question {
+      font-size: 32px;
+      font-weight: 600;
+      color: #2c1a1a;
+      text-align: center;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .btn {
+      padding: 12px 36px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #333;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .btn:hover { background: #f5f5f5; transform: scale(1.04); }
+    .btn:active { transform: scale(0.96); }
+
+    .btn-yes {
+      background: #FAECE7;
+      border-color: #F0997B;
+      color: #993C1D;
+    }
+    .btn-yes:hover { background: #F5C4B3; }
+
+    #answer {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      text-align: center;
+    }
+    #answer.show { display: flex; }
+
+    .answer-text {
+      font-size: 26px;
+      font-weight: 600;
+      color: #2c1a1a;
+      animation: fadeSlideIn 0.5s ease forwards;
+    }
+
+    .answer-sub {
+      font-size: 15px;
+      color: #888;
+      animation: fadeSlideIn 0.7s 0.3s ease both;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hearts-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -60px;
+      animation: floatUp linear forwards;
+      opacity: 0;
+    }
+
+    @keyframes floatUp {
+      0%   { opacity: 0;   transform: translateY(0)      rotate(0deg)   scale(0.5); }
+      10%  { opacity: 1; }
+      80%  { opacity: 0.9; }
+      100% { opacity: 0;   transform: translateY(-110vh) rotate(30deg) scale(1.2); }
+    }
+
+    .confetti-piece {
+      position: absolute;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+      opacity: 0;
+    }
+
+    @keyframes confettiFall {
+      0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh)  rotate(360deg); }
+    }
+
+    .pulse-ring {
+      position: fixed;
+      border-radius: 50%;
+      animation: pulseOut 0.9s ease-out forwards;
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    @keyframes pulseOut {
+      0%   { opacity: 0.6; transform: translate(-50%, -50%) scale(0.3); }
+      100% { opacity: 0;   transform: translate(-50%, -50%) scale(6); }
+    }
+
+    .shake {
+      animation: shake 0.5s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-10px) rotate(-2deg); }
+      40%      { transform: translateX(10px)  rotate(2deg); }
+      60%      { transform: translateX(-7px)  rotate(-1deg); }
+      80%      { transform: translateX(7px)   rotate(1deg); }
+    }
+
+    .emoji-big {
+      font-size: 72px;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    #reset-btn {
+      font-size: 13px;
+      color: #999;
+      cursor: pointer;
+      border: none;
+      background: none;
+      margin-top: 0.5rem;
+      text-decoration: underline;
+    }
+    #reset-btn:hover { color: #333; }
+  </style>
+</head>
+<body>
+
+<div class="hearts-container" id="heartsContainer"></div>
+
+<div id="scene">
+  <div id="question-area" style="display:flex; flex-direction:column; align-items:center; gap:2rem;">
+    <div class="question">Do you love me? 💌</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="handleYes()">Yes 💖</button>
+      <button class="btn" onclick="handleNo()">No</button>
+    </div>
+  </div>
+
+  <div id="answer"></div>
+</div>
+
+<script>
+  function handleYes() {
+    document.getElementById('question-area').style.display = 'none';
+    const answer = document.getElementById('answer');
+    answer.innerHTML = `
+      <div class="emoji-big">🥰</div>
+      <div class="answer-text">I know that! 💕</div>
+      <div class="answer-sub">You have great taste, obviously.</div>
+      <button id="reset-btn" onclick="reset()">Start over</button>
+    `;
+    answer.classList.add('show');
+    launchHearts();
+    launchConfetti();
+    launchPulseRings();
+  }
+
+  function handleNo() {
+    const qArea = document.getElementById('question-area');
+    qArea.classList.add('shake');
+    setTimeout(() => qArea.classList.remove('shake'), 600);
+
+    document.getElementById('question-area').style.display = 'none';
+    const answer = document.getElementById('answer');
+    answer.innerHTML = `
+      <div class="emoji-big">😤</div>
+      <div class="answer-text">Wrong answer.</div>
+      <div class="answer-sub">Try again. The correct answer starts with "Y".</div>
+      <button id="reset-btn" onclick="reset()">Let me fix that</button>
+    `;
+    answer.classList.add('show');
+  }
+
+  function launchHearts() {
+    const container = document.getElementById('heartsContainer');
+    const emojis = ['❤️','💖','💗','💓','💞','💕','🩷','💝'];
+    for (let i = 0; i < 25; i++) {
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.fontSize = (18 + Math.random() * 26) + 'px';
+      const dur = 2.5 + Math.random() * 2.5;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = (Math.random() * 1.5) + 's';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1.5) * 1000);
+    }
+  }
+
+  function launchConfetti() {
+    const container = document.getElementById('heartsContainer');
+    const colors = ['#F0997B','#D4537E','#7F77DD','#1D9E75','#EF9F27','#378ADD'];
+    for (let i = 0; i < 50; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.top = '0';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const dur = 1.5 + Math.random() * 2;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = (Math.random() * 1) + 's';
+      el.style.width = (6 + Math.random() * 7) + 'px';
+      el.style.height = (6 + Math.random() * 7) + 'px';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1) * 1000);
+    }
+  }
+
+  function launchPulseRings() {
+    const colors = ['#F0997B55','#7F77DD44','#1D9E7544'];
+    for (let i = 0; i < 3; i++) {
+      const ring = document.createElement('div');
+      ring.className = 'pulse-ring';
+      const size = 100 + i * 60;
+      ring.style.width = size + 'px';
+      ring.style.height = size + 'px';
+      ring.style.border = `3px solid ${colors[i]}`;
+      ring.style.top = '50%';
+      ring.style.left = '50%';
+      ring.style.animationDuration = '0.9s';
+      ring.style.animationDelay = (i * 0.15) + 's';
+      document.body.appendChild(ring);
+      setTimeout(() => ring.remove(), 1400);
+    }
+  }
+
+  function reset() {
+    document.getElementById('answer').classList.remove('show');
+    document.getElementById('answer').innerHTML = '';
+    document.getElementById('question-area').style.display = 'flex';
+    document.getElementById('heartsContainer').innerHTML = '';
+  }
+</script>
+
+</body>
+</html>
